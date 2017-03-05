@@ -1,0 +1,34 @@
+require "polyline.polyline"
+go.property("parent", msg.url())
+
+function init(self)
+	self.points = {}
+	self.segments = {}
+	self.width = 10
+	self.increment = 20
+	self.index = 1
+end
+
+function init_points(self)
+    self.polygons = get_segments(self.points, self.width)
+    for i, polygon in ipairs(self.polygons) do
+    	local id = factory.create("#segmentFactory", go.get_position())
+    	msg.post(id, "init_segment", {points=polygon, index=i, parent=go.get_id()})
+    	table.insert(self.segments, id)
+    end
+    msg.post(self.segments[1], "animate", {increment=self.increment})
+end
+
+
+function on_message(self, message_id, message, sender)
+    if message_id == hash("init_polyline") then
+    	self.points = message.points
+    	self.width = message.width
+    	self.increment = message.increment
+    	self.parent = msg.parent
+    	self.index = msg.index
+    	init_points(self)
+    elseif message_id == hash("animate_next") then
+    	msg.post(self.segments[message.index], "animate", {increment=self.increment})
+    end
+end

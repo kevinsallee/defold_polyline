@@ -1,0 +1,42 @@
+go.property("increment", 5)
+go.property("index", 1)
+go.property("parent", msg.url())
+
+function init(self)
+	self.state = "idle" 
+    self.percent = 0.1
+    self.points = nil 
+end
+
+function update(self, dt)
+	if self.state == "idle" then
+		return
+	end
+	local pos = go.get_position()
+    go.set("#sprite", "center", vmath.vector4(pos.x, pos.y, 0, 0))
+	self.percent = self.percent + self.increment/100
+	if self.percent >= 1 then
+		self.percent = 1
+		self.state = "idle"
+		msg.post(self.parent, "animate_next", {index = self.index + 1})
+	end
+	local p2 = self.p1 + self.percent * (self.p2 - self.p1)
+	local p3 = self.p4 + self.percent * (self.p3 - self.p4)
+    go.set("#sprite", "p1p2", vmath.vector4(self.p1.x, self.p1.y, p2.x, p2.y))
+    go.set("#sprite", "p3p4", vmath.vector4(p3.x, p3.y, self.p4.x, self.p4.y))
+end
+
+function on_message(self, message_id, message, sender)
+    if message_id == hash("init_segment") then
+    	local points = message.points
+		self.p1 = points[1]
+		self.p2 = points[2]
+		self.p3 = points[3]
+		self.p4 = points[4]
+		self.index = message.index
+		self.parent = message.parent
+	elseif message_id == hash("animate") then
+		self.increment = message.increment
+		self.state = "anim"
+	end
+end

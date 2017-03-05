@@ -1,0 +1,47 @@
+go.property("width", 20)
+go.property("increment", 20)
+
+function init(self)
+	self.polyline_points = {
+	    {
+	    	vmath.vector3(150, 150, 0),
+	    	vmath.vector3(300, 150, 0),
+	    	vmath.vector3(450, 150, 0),
+	    	vmath.vector3(600, 300, 0),
+	    },
+	    {
+	    	vmath.vector3(150, 300, 0),
+	    	vmath.vector3(300, 150, 0),
+	    	vmath.vector3(450, 300, 0),
+	    	vmath.vector3(600, 300, 0),
+	    },
+	    {
+	    	vmath.vector3(150, 450, 0),
+	    	vmath.vector3(300, 300, 0),
+	    	vmath.vector3(450, 150, 0),
+	    	vmath.vector3(600, 300, 0),
+	    }
+	}
+	self.polylines = {}
+    init_polylines(self)
+end
+
+function init_polylines(self)
+    for i, points in ipairs(self.polyline_points) do
+    	local id = factory.create("#polylineFactory", go.get_position())
+    	msg.post(id, "init_polyline", {
+    		points = points,
+    		width = self.width,
+    		increment = self.increment,
+    		index = i,
+    		parent=go.get_id()
+    	})
+    	table.insert(self.polylines, id)
+    end
+end
+
+
+function on_message(self, message_id, message, sender)
+    -- Add message-handling code here
+    -- Remove this function if not needed
+end
